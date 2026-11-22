@@ -64,6 +64,12 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .add input{font:inherit;font-weight:400;color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
 .add input:focus{outline:none;border-color:var(--accent)}
 @media (max-width:560px){.add{grid-template-columns:1fr 1fr}.add .wide{grid-column:1 / -1}}
+.ffgrid{display:grid;grid-template-columns:1fr 8em;gap:12px}
+.ffgrid3{grid-template-columns:repeat(3,1fr)}
+.ffgrid label{display:grid;gap:4px;font-weight:700;min-width:0;align-content:start}
+.ffgrid input,.ffgrid textarea{font:inherit;font-weight:400;color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%;box-sizing:border-box}
+.ffgrid .note{font-weight:400}
+@media (max-width:560px){.ffgrid,.ffgrid3{grid-template-columns:1fr}}
 details summary{cursor:pointer;font-weight:700;font-size:1.1rem}
 details[open] summary{margin-bottom:12px}
 details .stack{display:grid;gap:12px}
@@ -140,6 +146,30 @@ details .stack{display:grid;gap:12px}
         <option value="raise">Raised</option>
       </select>
       <span id="fontinfo" role="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="ff-h">
+    <div class="panel-head">
+      <span class="eyebrow">50/50 draw</span>
+      <h2 id="ff-h">Try the 50/50 draw</h2>
+      <p>The host emails the sign the ticket rolls handed out and the prize, then presses the button by the microphone to draw. Here these buttons stand in for the button. Each draw spins every digit; they stop left to right, slower toward the end. The digits before the last 4 are drawn smaller.</p>
+    </div>
+    <div class="ffgrid">
+      <label for="ffr">Tickets handed out<span class="note">First and last of each roll, one roll per line</span><textarea id="ffr" rows="2">123400 to 123499
+123700 to 123760</textarea></label>
+      <label for="ffp">Prize ($)<input id="ffp" type="number" min="1" value="54"></label>
+    </div>
+    <div class="ffgrid ffgrid3">
+      <label for="fffirst">First digit stops after (s)<input id="fffirst" type="number" min="0" step="0.1" value="1.5"></label>
+      <label for="ffshort">Then between digits (s)<input id="ffshort" type="number" min="0" step="0.1" value="0.5"></label>
+      <label for="fflast">Before the last three (s)<input id="fflast" type="text" value="2, 3, 4"></label>
+    </div>
+    <div class="row">
+      <button class="primary" id="ffstart" type="button">Start 50/50</button>
+      <button class="secondary" id="ffdraw" type="button">Press: draw</button>
+      <button class="secondary" id="ffend" type="button">Hold: back to events</button>
+      <span class="note" id="ffnote" role="status" aria-live="polite"></span>
     </div>
   </section>
 
@@ -532,7 +562,8 @@ function drawStrip(strip,offset,y,scrolls){
 function frame(t){
   const dt=last?Math.min(0.1,(t-last)/1000):0;last=t;
   bx.fillStyle='#000';bx.fillRect(0,0,W,H);
-  if(layout==='pages')drawPage(dt);
+  if(mode==='5050'&&ff)draw5050(dt);
+  else if(layout==='pages')drawPage(dt);
   else{
     if(!paused){topX=(topX+SLOW*dt)%topStrip.width;if(botStrip&&botStrip.width>W*1.0)botX=(botX+SLOW*dt)%botStrip.width;}
     drawStrip(topStrip,topX,0,true);
@@ -556,6 +587,108 @@ function frame(t){
 let trimCache=null;
 function measureGap(){bx.font=fontStr(botSize);return runWidth(bx,'          ');}
 function trimmed(){if(!trimCache||trimCache.msg!==message){trimCache={msg:message,c:makeStrip([{text:message,color:GREEN}],botSize,'bottom')};}return trimCache.c;}
+
+/* ---------- 50/50 draw ----------
+   One line, centered top to bottom, so each digit has the sign's full height to scroll in.
+   The ticket is picked when the button is pressed; the spin is only for show. Every digit
+   spins (each at a slightly different speed) and they stop left to right: the first after
+   "First digit stops after", then "Then between digits" apart, and the last three after the
+   "Before the last three" delays. Digits before the last 4 are drawn smaller. */
+let mode='events',ff=null;
+const FF_DECEL=0.5;      // seconds each reel takes to slow to a stop
+const FF_SMALL=0.72;     // size of the digits before the last 4, against the others
+function val(id){return document.getElementById(id).value;}
+function parseRanges(s){
+  const out=[];
+  for(const m of s.matchAll(/(\d+)\s*(?:to|-|–|—)\s*(\d+)/gi)){
+    let a=m[1],b=m[2];if(+b<+a)[a,b]=[b,a];
+    out.push({a:+a,b:+b,len:Math.max(a.length,b.length)});
+  }
+  return out;
+}
+function ffStops(n){ // seconds after the press at which each digit stops
+  const last=val('fflast').split(/[,\s]+/).filter(Boolean).map(Number);
+  const t=[];let x=+val('fffirst');
+  for(let k=0;k<n;k++){
+    if(k>0){const j=k-(n-last.length);x+=j>=0?last[j]:+val('ffshort');}
+    t.push(x);
+  }
+  return t;
+}
+function ffDraw(){
+  if(!ff||ff.spinning)return;            // presses during the spin are ignored
+  const note=document.getElementById('ffnote');
+  if(ff.used.size>=ff.total){note.textContent='Every ticket has been drawn.';return;}
+  let idx;do{idx=Math.floor(Math.random()*ff.total);}while(ff.used.has(idx));
+  ff.used.add(idx);
+  let i=idx,r;for(r of ff.ranges){const n=r.b-r.a+1;if(i<n)break;i-=n;}
+  ff.ticket=String(r.a+i).padStart(r.len,'0');
+  ff.t=0;ff.stops=ffStops(ff.ticket.length);
+  ff.speeds=[...ff.ticket].map(()=>10+Math.random()*8); // digits a second
+  ff.spinning=true;
+  note.textContent=`Drawing ticket ${ff.used.size} of ${ff.total}…`;
+}
+function reelPos(k,t){ // reel position in digits; ends exactly on the ticket's digit k
+  const d=+ff.ticket[k],v=ff.speeds[k],ts=ff.stops[k];
+  const P=d+10*Math.ceil(v*ts/10+1);
+  if(t>=ts)return P;
+  if(t>=ts-FF_DECEL){const r=ts-t;return P-v*r*r/(2*FF_DECEL);} // slowing into place
+  return P-v*FF_DECEL/2-v*(ts-FF_DECEL-t);
+}
+function draw5050(dt){
+  if(ff.spinning&&!paused){
+    ff.t+=dt;
+    if(ff.t>=ff.stops[ff.stops.length-1]){ff.spinning=false;
+      document.getElementById('ffnote').textContent=`Ticket ${ff.ticket}. Press "Draw" again if the winner isn't here.`;}
+  }
+  const big=botSize,small=Math.round(botSize*FF_SMALL);
+  bx.textBaseline='alphabetic';
+  if(!ff.ticket){ // before the first draw: the prize, one line in the middle
+    const s=makeStrip([{text:'50/50: ',color:WHITE},{text:'$'+ff.prize,color:AMBER},{text:' for winner',color:WHITE}],big,'top');
+    const k=inkOf(big);
+    bx.drawImage(s,Math.floor((W-s.width)/2),Math.round((H-(k.asc+k.desc))/2));
+    return;
+  }
+  const n=ff.ticket.length,nSmall=Math.max(0,n-4);
+  const T=s=>cur.caps?s.toUpperCase():s;
+  bx.font=fontStr(big);
+  const capB=bx.measureText('0').actualBoundingBoxAscent;
+  const label=T('Ticket ');
+  const labelW=runWidth(bx,label);
+  const cellOf=size=>{bx.font=fontStr(size);let w=0;for(let d=0;d<10;d++)w=Math.max(w,bx.measureText(String(d)).width);return Math.ceil(w)+1;};
+  const cellB=cellOf(big),cellS=cellOf(small);
+  bx.font=fontStr(small);const capS=bx.measureText('0').actualBoundingBoxAscent;
+  const total=labelW+nSmall*cellS+(n-nSmall)*cellB;
+  const base=Math.round(H/2+capB/2);  // the line's middle on the sign's middle
+  let x=Math.floor((W-total)/2);
+  bx.font=fontStr(big);bx.fillStyle=`rgb(${WHITE})`;drawRun(bx,label,x,base);x+=labelW;
+  for(let k=0;k<n;k++){
+    const sm=k<nSmall,size=sm?small:big,cell=sm?cellS:cellB;
+    const pitch=Math.round((sm?capS:capB)+8); // distance between digits on the reel
+    bx.font=fontStr(size);bx.fillStyle=`rgb(${AMBER})`;
+    const pos=reelPos(k,ff.t),stopped=ff.t>=ff.stops[k];
+    const f=Math.floor(pos);
+    for(let m=f-2;m<=f+2;m++){
+      if(stopped&&m!==pos)continue;     // a stopped digit shows alone
+      const y=base+(m-pos)*pitch;if(y<-pitch||y>H+pitch)continue;
+      const dg=String(((m%10)+10)%10);
+      bx.fillText(dg,x+(cell-bx.measureText(dg).width)/2,Math.round(y));
+    }
+    x+=cell;
+  }
+}
+document.getElementById('ffstart').onclick=()=>{
+  const ranges=parseRanges(val('ffr')),note=document.getElementById('ffnote');
+  if(!ranges.length){note.textContent='Enter the first and last ticket of each roll, like 123400 to 123499.';return;}
+  const total=ranges.reduce((n,r)=>n+r.b-r.a+1,0);
+  ff={prize:val('ffp')||'0',ranges,total,used:new Set(),ticket:null,t:0,stops:[],speeds:[],spinning:false};
+  mode='5050';note.textContent=`${total} tickets. Press "Draw" to draw one.`;
+};
+document.getElementById('ffdraw').onclick=()=>{
+  if(mode!=='5050')document.getElementById('ffstart').onclick();
+  ffDraw();
+};
+document.getElementById('ffend').onclick=()=>{mode='events';ff=null;document.getElementById('ffnote').textContent='Back to events.';};
 
 /* ---------- controls ---------- */
 document.getElementById('save').onclick=()=>{

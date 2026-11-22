@@ -35,3 +35,5 @@ button.plain{background:none;color:var(--accent);border:1px solid var(--line);pa
 footer{margin-top:3rem;color:var(--muted);font-size:.9rem}
 /* A small picture of the sign's two lines, in its font. */
 .sign-demo{background:#16120f;border:8px solid #2a2622;border-radius:6px;color:#ffb347;font:2rem/1.15 "League Gothic","Arial Narrow",sans-serif;letter-spacing:.02em;padding:.35rem .7rem;margin:.6rem 0 1rem;max-width:30rem}
+.sign-demo.one{display:flex;align-items:center;min-height:calc(2.3em + .7rem)}
+.sign-demo small{font-size:.72em}
