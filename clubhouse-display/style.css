@@ -33,3 +33,5 @@ button.plain{background:none;color:var(--accent);border:1px solid var(--line);pa
 .result .field{display:grid;gap:.25rem}
 .result .head{display:flex;gap:.6rem;align-items:center;justify-content:space-between;font-weight:600}
 footer{margin-top:3rem;color:var(--muted);font-size:.9rem}
+/* A small picture of the sign's two lines, in its font. */
+.sign-demo{background:#16120f;border:8px solid #2a2622;border-radius:6px;color:#ffb347;font:2rem/1.15 "League Gothic","Arial Narrow",sans-serif;letter-spacing:.02em;padding:.35rem .7rem;margin:.6rem 0 1rem;max-width:30rem}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clubhouse sign: picking potluck tables</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Gothic&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<p class="crumb"><a href="./">← The clubhouse sign</a></p>
+<h1>Picking potluck tables</h1>
+<p class="note"><strong>Preview.</strong> The sign isn't built yet. This shows how it will work.</p>
+
+<p>The sign calls the tables up in a random order, so nobody has to draw numbers from a hat.
+The host runs it with the button near the microphone.</p>
+
+<h2>The button</h2>
+<table>
+<tr><th>Press</th><th>How</th></tr>
+<tr><td>Press</td><td>Press and let go</td></tr>
+<tr><td>Double press</td><td>Two quick presses</td></tr>
+<tr><td>Hold</td><td>Hold it down for about 2 seconds</td></tr>
+</table>
+
+<h2>1. Before the potluck: set it up</h2>
+<p>The host <a href="forms.html">emails the sign</a> the number of tables. The host's email
+address must be approved to run potlucks. This can be done hours ahead: until the host starts,
+the sign shows events as usual and the button turns it off and on as usual. The sign replies
+with a short guide to the button.</p>
+
+<h2>2. Start</h2>
+<p><strong>Hold</strong> the button. The sign asks those who need help to go first:</p>
+<div class="sign-demo" role="img" aria-label="The sign shows: Anyone needing help please go first"><div>Anyone needing help</div><div>please go first</div></div>
+
+<h2>3. Call the tables</h2>
+<p><strong>Press</strong> once each time the next table should go up. The sign picks a table
+that hasn't been called yet and adds it to the list:</p>
+<div class="sign-demo" role="img" aria-label="The sign shows: Food: 12, 7, 3 "><div>Food: 12, 7, 3</div><div>&nbsp;</div></div>
+<p>The newest numbers are on the right; when the line is full, the oldest drop off. The last
+table is marked:</p>
+<div class="sign-demo" role="img" aria-label="The sign shows: Food: … 9, 14, 1, 20 (last) "><div>Food: … 9, 14, 1, 20 (last)</div><div>&nbsp;</div></div>
+<ul>
+<li>A second press within 5 seconds is ignored, so a shaky press doesn't skip a table.</li>
+<li>Once called, a table stays called: there's no undo.</li>
+<li>Pressing after the last table does nothing.</li>
+</ul>
+
+<h2>4. Seconds</h2>
+<p>After the last table, <strong>double press</strong>:</p>
+<div class="sign-demo" role="img" aria-label="The sign shows: Food: seconds, anyone! "><div>Food: seconds, anyone!</div><div>&nbsp;</div></div>
+
+<h2>5. Dessert</h2>
+<p><strong>Hold</strong> the button. Then <strong>press</strong> once for each table, as for
+the food. Dessert goes in the reverse order of the food, so the tables that ate last get dessert
+first. Dessert can start at any time, even if not every table has been called for food.</p>
+<div class="sign-demo" role="img" aria-label="The sign shows: Food: … 9, 14, 1, 20 (last) Dessert: 20, 1, 14"><div>Food: … 9, 14, 1, 20 (last)</div><div>Dessert: 20, 1, 14</div></div>
+
+<h2>6. Finish</h2>
+<p><strong>Hold</strong> the button, and the sign goes back to showing events. If nobody
+presses the button for 3 hours, the sign finishes the potluck by itself.</p>
+<p class="hint">If the sign restarts during the potluck, it carries on where it left off. If the
+potluck is set up but never started, the setup ends at midnight.</p>
+
+<footer>Clubhouse sign · Golden Gate Mobile Home Community</footer>
+</main>
+</body>
+</html>
