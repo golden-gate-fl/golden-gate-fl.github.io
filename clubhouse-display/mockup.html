@@ -1,0 +1,608 @@
+<title>Clubhouse Sign Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@600&family=Saira+Condensed:wght@700&family=Oswald:wght@700&family=Fira+Sans+Extra+Condensed:wght@700&family=Bebas+Neue&family=League+Gothic&family=Antonio:wght@700&family=Big+Shoulders+Display:wght@700&display=swap">
+<style>
+/* Layout: one narrow column; the LED sign on top, then the edit page as residents would see it, then the email test. */
+:root{
+  --bg:#eef1f3; --surface:#ffffff; --fg:#1d2529; --muted:#5a666d; --line:#d3dade;
+  --accent:#1f6a73; --accent-fg:#ffffff; --ok:#2c7a3f;
+  --frame:#2a2622; --led-off:#16120f;
+  --font:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a1d; --surface:#1d2529; --fg:#e8eef0; --muted:#9aa8ae; --line:#33404a;
+  --accent:#5fb4be; --accent-fg:#0d1b1e; --ok:#6cc583; --frame:#0b0908; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1d; --surface:#1d2529; --fg:#e8eef0; --muted:#9aa8ae; --line:#33404a;
+  --accent:#5fb4be; --accent-fg:#0d1b1e; --ok:#6cc583; --frame:#0b0908; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:17px;line-height:1.5}
+.wrap{max-width:900px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:32px}
+h1,h2{text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:1.9rem}
+h2{font-size:1.3rem}
+p{margin:0}
+.eyebrow{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.intro{display:grid;gap:8px}
+.intro p{color:var(--muted);max-width:62ch}
+
+.sign-block{display:grid;gap:10px}
+.frame{background:var(--frame);border-radius:6px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+#sign{display:block;width:100%;height:auto;aspect-ratio:5/1;max-width:100%}
+.sign-meta{display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between;color:var(--muted);font-size:.9rem}
+.sign-meta button{font:inherit;background:none;border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:2px 12px;cursor:pointer}
+.fontpick{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:.95rem}
+.fontpick label{font-weight:700}
+.fontpick label.chk{font-weight:400;display:flex;gap:6px;align-items:center}
+.fontpick label.chk input{width:1.1em;height:1.1em;accent-color:var(--accent)}
+.fontpick select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 8px;max-width:100%}
+.fontpick select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#fontinfo{color:var(--muted)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;display:grid;gap:20px}
+.panel-head{display:grid;gap:4px}
+.panel-head p{color:var(--muted)}
+label.big{font-size:1.35rem;font-weight:700}
+textarea{font:inherit;color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:12px;width:100%;box-sizing:border-box;resize:vertical}
+#msg{font-size:1.4rem;min-height:4.5em}
+#msg:focus,#email:focus{outline:none;border-color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.primary{font:inherit;font-size:1.3rem;font-weight:700;background:var(--accent);color:var(--accent-fg);border:0;border-radius:8px;padding:14px 40px;cursor:pointer}
+.secondary{font:inherit;font-size:1rem;font-weight:700;background:none;color:var(--accent);border:2px solid var(--accent);border-radius:8px;padding:8px 20px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+#saved{color:var(--ok);font-weight:700;font-size:1.1rem}
+
+.events{list-style:none;margin:0;padding:0;display:grid;border-top:1px solid var(--line)}
+.events li{display:grid;grid-template-columns:10.5em 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.events .when{font-variant-numeric:tabular-nums;font-weight:700}
+.events .what{min-width:0}
+.events li.hidden .when,.events li.hidden .what{opacity:.4;text-decoration:line-through}
+.events button{font:inherit;font-size:.95rem;background:none;border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:4px 14px;cursor:pointer;min-width:5.5em}
+.note{font-size:.95rem;color:var(--muted)}
+#email{font-size:.9rem;min-height:14em;font-family:ui-monospace,Menlo,Consolas,monospace}
+.add{display:grid;grid-template-columns:11em 8em 1fr;gap:12px}
+.add label{display:grid;gap:4px;font-weight:700;min-width:0}
+.add input{font:inherit;font-weight:400;color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.add input:focus{outline:none;border-color:var(--accent)}
+@media (max-width:560px){.add{grid-template-columns:1fr 1fr}.add .wide{grid-column:1 / -1}}
+details summary{cursor:pointer;font-weight:700;font-size:1.1rem}
+details[open] summary{margin-bottom:12px}
+details .stack{display:grid;gap:12px}
+@media (max-width:560px){
+  .events li{grid-template-columns:1fr auto}
+  .events .when{grid-column:1}
+  .events .what{grid-column:1}
+  .events button{grid-row:1 / span 2;grid-column:2}
+  .panel{padding:18px}
+  .primary{width:100%}
+}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Mockup · Golden Gate clubhouse</span>
+    <h1>Clubhouse sign over the kitchen opening</h1>
+    <p>This is how the LED sign would look, using events from the October 29 weekly email. Use the Layout menu to compare showing one message at a time (each event, and the announcement, gets the whole sign for a few seconds) with two lines at once (events scroll along the top while the announcement stays on the bottom). Events disappear by themselves once their day has passed.</p>
+  </header>
+
+  <section class="sign-block" aria-label="Sign preview">
+    <div class="frame"><canvas id="sign" width="1280" height="256" role="img" aria-label="LED sign showing upcoming events and the announcement"></canvas></div>
+    <div class="sign-meta">
+      <span>About 63 in × 12.6 in · 320 × 64 lights (5 × 2 panels) · on 7 am to 11 pm</span>
+      <button id="pause" type="button">Pause</button>
+    </div>
+    <div class="fontpick">
+      <label for="layout">Layout</label>
+      <select id="layout" autocomplete="off">
+        <option value="pages" selected>One message at a time</option>
+        <option value="lines">Two lines at once</option>
+      </select>
+      <label class="chk" for="pace">Time on each message</label>
+      <select id="pace" autocomplete="off">
+        <option value="quick" selected>Quick: about 2 s for 37 letters</option>
+        <option value="medium">Medium: about 3 s for 37 letters</option>
+        <option value="slow">Original: at least 4 s</option>
+      </select>
+      <label class="chk" for="ann">Announcement</label>
+      <select id="ann" autocomplete="off">
+        <option value="wrap">Wrap onto two lines (nothing moves)</option>
+        <option value="dot" selected>Split at the dot (second line slides)</option>
+      </select>
+      <label class="chk" for="scroll">Fast scroll</label>
+      <select id="scroll" autocomplete="off">
+        <option value="24">Slow (24 lights a second)</option>
+        <option value="32">Original (32 lights a second)</option>
+        <option value="40">A bit faster (40)</option>
+        <option value="48">Faster (48)</option>
+        <option value="64">Fast (64)</option>
+        <option value="96">96</option>
+        <option value="128">128</option>
+        <option value="160">160</option>
+        <option value="200">200</option>
+        <option value="256">256</option>
+        <option value="320" selected>320 (a whole sign width a second)</option>
+      </select>
+      <label class="chk" for="slow">Slow scroll (rest of a long line)</label>
+      <select id="slow" autocomplete="off">
+        <option value="24">24 lights a second</option>
+        <option value="32">32</option>
+        <option value="40">40</option>
+        <option value="48">48</option>
+        <option value="64" selected>64</option>
+      </select>
+    </div>
+    <div class="fontpick">
+      <label for="fontsel">Compare fonts</label>
+      <select id="fontsel" autocomplete="off"></select>
+      <label class="chk" for="desc">Descenders (g j p q y)</label>
+      <select id="desc" autocomplete="off">
+        <option value="normal">Normal</option>
+        <option value="squash" selected>Shrunk to sit on the line</option>
+        <option value="raise">Raised</option>
+      </select>
+      <span id="fontinfo" role="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="edit-h">
+    <div class="panel-head">
+      <span class="eyebrow">Optional · only if the office network allows it</span>
+      <h2 id="edit-h">A web page for changing the sign</h2>
+      <p>Officers normally change the sign by sending it an ordinary email. If the office has a network the sign can join (proposal section 7), the sign could also offer a page like this one.</p>
+    </div>
+    <div style="display:grid;gap:10px">
+      <label class="big" for="msg">What the sign says</label>
+      <textarea id="msg" rows="2">Turkey Potluck Nov 13 · Sign up in the clubhouse by Nov 6</textarea>
+      <p class="note">Type your message and press Save. Leave it empty to show events only.</p>
+    </div>
+    <div class="row">
+      <button class="primary" id="save" type="button">Save</button>
+      <span id="saved" role="status" aria-live="polite"></span>
+    </div>
+
+    <div style="display:grid;gap:10px">
+      <h2>Upcoming events</h2>
+      <p class="note">These come from the weekly email by themselves. Press Hide on any event you don't want on the sign.</p>
+      <ul class="events" id="events"></ul>
+    </div>
+
+    <div style="display:grid;gap:10px">
+      <h2>Add an event the email missed</h2>
+      <div class="add">
+        <label for="ad">Date<input type="date" id="ad" value="2026-11-11"></label>
+        <label for="at">Time (if any)<input type="text" id="at" placeholder="7 pm"></label>
+        <label for="aw" class="wide">What<input type="text" id="aw" placeholder="Hot Mess Dance"></label>
+      </div>
+      <div class="row"><button class="secondary" id="add" type="button">Add to sign</button><span class="note" id="addnote" role="status"></span></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="try-h">
+    <details>
+      <summary id="try-h">Try it with a different weekly email</summary>
+      <div class="stack">
+        <p class="note">In the real system the sign reads the email itself. Here you can paste one in to see what it would pick out.</p>
+        <textarea id="email" aria-label="Weekly email text"></textarea>
+        <div class="row"><button class="secondary" id="read" type="button">Read this email</button><span class="note" id="readnote"></span></div>
+      </div>
+    </details>
+  </section>
+</div>
+
+<script>
+const SAMPLE=`Golden Gate Weekly Update
+
+October 29, 2026
+
+Free Grocery Give Away – TODAY Thursday October 29th at 12:00PM
+
+    Come stock up on free groceries complements of SOLIS Health Care
+
+No Church Sunday November 1st
+
+Nuggets Club – Turkey Potluck Dinner November 13th 5:00PM
+
+    Sign up in the clubhouse
+    We need a count by Friday November 6th to know how much meat to purchase.
+
+Hot Mess Dance – Wednesday November 11th 7:00PM – 10:00PM
+
+    Jean Chudzik and Anne Jones will host a dance on Wednesday, November 11th from 7-10pm featuring "Hot Mess". Tickets: $10.
+
+Shuffle Club – Meeting Tuesday November 10th at 6:30PM
+
+    The date in the Nugget Magazine is incorrect – the correct date is November 10th at 6:30PM
+
+Water usage reminder
+
+    As you come back from your summer break please check the back of your toilet.
+
+This Week's Activities
+
+    Shuffle Horse Collar Game – Tuesday & Saturday, 10:00 AM
+`;
+
+/* ---------- email reader (same rules the sign would use) ---------- */
+const MONTHS=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const MON_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MON_RE=/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\b(?:,?\s*(\d{4}))?/i;
+const TIME_RE=/\b(\d{1,2})(?::(\d\d))?\s*([ap])\.?m\.?\b/i;
+function decode(s){return s.replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&nbsp;/g,' ').replace(/ /g,' ');}
+function parseEmail(text){
+  const lines=decode(text).split(/\r?\n/);
+  let sent=null;
+  for(const l of lines){const m=l.trim().match(/^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/);
+    if(m&&MONTHS.includes(m[1].slice(0,3).toLowerCase())){sent=new Date(+m[3],MONTHS.indexOf(m[1].slice(0,3).toLowerCase()),+m[2]);break;}}
+  if(!sent){const n=new Date();sent=new Date(n.getFullYear(),n.getMonth(),n.getDate());}
+  const events=[];
+  for(const raw of lines){
+    if(/^(\s{2,}|\t)/.test(raw))continue;
+    const line=raw.trim();
+    if(/^this week'?s activities/i.test(line)||/^sincerely/i.test(line))break;
+    const dm=line.match(MON_RE);if(!dm)continue;
+    if(/^[A-Za-z]+\s+\d{1,2},\s*\d{4}$/.test(line))continue;
+    const mon=MONTHS.indexOf(dm[1].slice(0,3).toLowerCase()),day=+dm[2];
+    let year=dm[3]?+dm[3]:sent.getFullYear();
+    if(!dm[3]&&mon<sent.getMonth()-2)year++;
+    const tm=line.match(TIME_RE);
+    const time=tm?tm[1]+(tm[2]&&tm[2]!=='00'?':'+tm[2]:'')+' '+tm[3].toLowerCase()+'m':'';
+    const title=line.slice(0,dm.index).replace(/\b(today|tonight|tomorrow)\b/ig,'')
+      .replace(/\b(sun|mon|tues?|wed(nes)?|thu(rs)?|fri|sat(ur)?)(day)?\b,?/ig,'')
+      .replace(/\b(on|at)\s*$/i,'').replace(/[\s–—\-:,]+$/,'').replace(/\s{2,}/g,' ').trim();
+    if(title)events.push({date:new Date(year,mon,day),time,title,hidden:false});
+  }
+  events.sort((a,b)=>a.date-b.date);
+  return {today:sent,events:events.filter(e=>e.date>=sent)};
+}
+
+/* ---------- state ---------- */
+let state=parseEmail(SAMPLE);
+// Regular activities: monthly ones show their next date, weekly ones show their pattern at the end of the list.
+state.events.push({date:new Date(2026,10,14),time:'8 am',title:"Men's Club Breakfast",hidden:false});
+state.events.push({date:new Date(9999,0,1),weekly:'Mon/Wed/Fri, 1 pm',title:'Euchre',hidden:false});
+state.events.push({date:new Date(9999,0,1),weekly:'Tue, 1 pm',title:'Chair Volleyball',hidden:false});
+state.events.sort((a,b)=>a.date-b.date);
+let message=document.getElementById('msg').value.trim();
+
+function whenText(e){
+  if(e.weekly)return e.weekly;
+  const same=e.date.getTime()===state.today.getTime();
+  const d=same?'Today':DAYS[e.date.getDay()]+' '+MON_NAMES[e.date.getMonth()]+' '+e.date.getDate();
+  return e.time?d+', '+e.time:d;
+}
+function renderList(){
+  const ul=document.getElementById('events');ul.innerHTML='';
+  if(!state.events.length){ul.innerHTML='<li><span class="what">No upcoming events found in that email.</span></li>';return;}
+  state.events.forEach((e,i)=>{
+    const li=document.createElement('li');if(e.hidden)li.className='hidden';
+    li.innerHTML=`<span class="when"></span><span class="what"></span><button type="button"></button>`;
+    li.children[0].textContent=whenText(e);li.children[1].textContent=e.title;
+    li.children[2].textContent=e.hidden?'Show':'Hide';
+    li.children[2].setAttribute('aria-label',(e.hidden?'Show ':'Hide ')+e.title);
+    li.children[2].onclick=()=>{e.hidden=!e.hidden;renderList();buildStrips();};
+    ul.appendChild(li);
+  });
+}
+
+/* ---------- LED sign simulation ---------- */
+const W=320,H=64; // 5 panels across, 2 high
+// Fonts to compare. "fixed" keeps the original mockup sizes (top, bottom), centered in each line.
+// The others are sized to 31 of each line's 32 lights and pushed to the sign's outer edges: the
+// top line against the top edge, the bottom line against the bottom edge, leaving a 2-light gap
+// between the lines.
+const FONTS=[
+  {id:'ah-orig',label:'Atkinson Hyperlegible (original mockup)',family:'Atkinson Hyperlegible',weight:700,fixed:[25,23]},
+  {id:'ah',label:'Atkinson Hyperlegible, as big as fits',family:'Atkinson Hyperlegible',weight:700},
+  {id:'barlow',label:'Barlow Condensed SemiBold',family:'Barlow Condensed',weight:600},
+  {id:'saira',label:'Saira Condensed Bold',family:'Saira Condensed',weight:700},
+  {id:'oswald',label:'Oswald Bold',family:'Oswald',weight:700},
+  {id:'fira',label:'Fira Sans Extra Condensed Bold',family:'Fira Sans Extra Condensed',weight:700},
+  {id:'league',label:'League Gothic',family:'League Gothic',weight:400},
+  {id:'antonio',label:'Antonio Bold',family:'Antonio',weight:700},
+  {id:'bigsh',label:'Big Shoulders Display Bold',family:'Big Shoulders Display',weight:700},
+  {id:'barlow-caps',label:'Barlow Condensed SemiBold, all caps',family:'Barlow Condensed',weight:600,caps:true},
+  {id:'bebas',label:'Bebas Neue, all caps',family:'Bebas Neue',weight:400,caps:true},
+];
+let cur=FONTS.find(f=>f.id==='league'),topSize=25,botSize=23;
+// How g j p q y are drawn so nothing hangs below the baseline, letting the font be bigger:
+// 'raise' lifts the whole letter; 'squash' keeps its top where it is and shrinks it vertically
+// so its tail ends on the baseline.
+let descMode='squash';
+const RAISED=new Set('gjpqy');
+const LED_INCHES=0.197; // 5 mm between lights
+function fontStr(size){return `${cur.weight} ${size}px "${cur.family}", "Segoe UI", sans-serif`;}
+function raising(){return descMode!=='normal'&&!cur.caps;}
+function inkOf(size){ // how far the tallest and lowest letters reach above and below the baseline
+  bx.font=fontStr(size);
+  const m=bx.measureText(cur.caps?'HOW0123456789':raising()?'Hbdfhkl':'Hbdfghjklpqy');
+  return {asc:m.actualBoundingBoxAscent,desc:m.actualBoundingBoxDescent};
+}
+// Text width and drawing. With raised descenders, letters are drawn one at a time.
+function runWidth(x,s){
+  if(!raising())return Math.ceil(x.measureText(s).width);
+  let w=0;for(const ch of s)w+=x.measureText(ch).width;return Math.ceil(w);
+}
+function drawRun(x,s,cx,base){
+  if(!raising()){x.fillText(s,cx,base);return;}
+  for(const ch of s){
+    const m=x.measureText(ch);
+    // Anything that hangs below the baseline (g j p q y, and also , ; ( ) etc.) is adjusted;
+    // the small overshoot of round letters like o and s is left alone.
+    if(m.actualBoundingBoxDescent<=1.5){x.fillText(ch,cx,base);}
+    else if(descMode==='raise'&&RAISED.has(ch)){x.fillText(ch,cx,base-m.actualBoundingBoxDescent);}
+    else{ // squash: top stays put, bottom of the tail lands on the baseline
+      const asc=m.actualBoundingBoxAscent,desc=m.actualBoundingBoxDescent;
+      x.save();x.translate(cx,base-asc);x.scale(1,asc/(asc+desc));x.fillText(ch,0,asc);x.restore();
+    }
+    cx+=m.width;
+  }
+}
+function fitSize(){let best=10;for(let s=10;s<=64;s++){const k=inkOf(s);if(k.asc+k.desc<=31)best=s;else break;}return best;}
+function applyFont(){
+  if(cur.fixed)[topSize,botSize]=cur.fixed;else topSize=botSize=fitSize();
+  bx.font=fontStr(botSize);
+  const cap=Math.round(bx.measureText('H').actualBoundingBoxAscent);
+  const sample=cur.caps?'WED NOV 11 7 PM HOT MESS DANCE FRI NOV 13 5 PM TURKEY':'Turkey Potluck Nov 13 · Sign up in the clubhouse by Nov 6';
+  const avg=bx.measureText(sample).width/sample.length;
+  document.getElementById('fontinfo').textContent=
+    `Capital letters about ${(cap*LED_INCHES).toFixed(1)} in tall · about ${Math.round(W/avg)} characters fit across`;
+  document.getElementById('desc').disabled=!!cur.caps;
+  trimCache=null;buildStrips();
+}
+function loadFont(){
+  return document.fonts&&document.fonts.load?document.fonts.load(fontStr(30)).catch(()=>{}):Promise.resolve();
+}
+const AMBER=[255,176,40],WHITE=[255,244,228],GREEN=[90,230,150],DOT=[110,90,70];
+const buf=document.createElement('canvas');buf.width=W;buf.height=H;
+const bx=buf.getContext('2d',{willReadFrequently:true});
+const sign=document.getElementById('sign'),sx=sign.getContext('2d');
+let topStrip=null,botStrip=null,topX=0,botX=0,paused=false,last=0;
+
+function makeStrip(parts,size,pos){ // parts: [{text,color}]; pos: 'top' or 'bottom' line
+  const c=document.createElement('canvas'),x=c.getContext('2d');
+  const T=s=>cur.caps?s.toUpperCase():s;
+  x.font=fontStr(size);
+  let w=0;for(const p of parts)w+=runWidth(x,T(p.text));
+  c.width=Math.max(1,w);c.height=32;
+  const k=inkOf(size);
+  const base=cur.fixed?Math.round((32-(k.asc+k.desc))/2+k.asc) // original: centered in the line
+    :pos==='top'?Math.round(k.asc)                              // tops of letters on the sign's top edge
+    :Math.round(32-k.desc);                                     // bottoms on the sign's bottom edge
+  x.font=fontStr(size);x.textBaseline='alphabetic';
+  let cx=0;for(const p of parts){const s=T(p.text);x.fillStyle=`rgb(${p.color})`;drawRun(x,s,cx,base);cx+=runWidth(x,s);}
+  return c;
+}
+function buildStrips(){
+  const parts=[];
+  const shown=state.events.filter(e=>!e.hidden);
+  if(!shown.length)parts.push({text:'Welcome to the Golden Gate clubhouse      ',color:WHITE});
+  for(const e of shown){parts.push({text:whenText(e)+'  ',color:AMBER});parts.push({text:e.title+'      •      ',color:WHITE});}
+  topStrip=makeStrip(parts,topSize,'top');
+  botStrip=message?makeStrip([{text:message+'          ',color:GREEN}],botSize,'bottom'):null;
+  topX=0;botX=0;
+  buildPages();
+}
+
+/* One message at a time: the sign shows a "page" (an event's date on top and its name below, or
+   the announcement), holds it, goes blank briefly, then shows the next. A line too long to fit
+   waits, slides along to show its end, then waits again. The announcement comes round again
+   after every few events. */
+let layout='pages',pages=[],pageI=0,pageT=0;
+let SPEED=320;           // lights per second for the fast move past text already read (Fast scroll menu)
+let SLOW=64;             // lights per second for text still to be read, and for continuous scrolling (Slow scroll menu)
+// A line too wide for the sign (times from the "Time on each message" formula):
+//  1. wait long enough to read the screen: the lines that fit, plus the first READ_PART of the wide line;
+//  2. move fast (SPEED) by READ_PART of a sign width, so the part already read goes out of view;
+//  3. if more is left, scroll it slowly (SLOW), so it can be read while it moves;
+//  4. wait long enough to read everything after the first READ_PART (less the time the slow scroll took).
+const READ_PART=0.8;
+const END_MIN=1;         // shortest wait at the end, in seconds
+function slideOffset(t,over){ // lights moved t seconds after the first wait
+  if(t<=0)return 0;
+  const fast=Math.min(over,READ_PART*W),f=fast/SPEED;
+  if(t<f)return t*SPEED;
+  return Math.min(over,fast+(t-f)*SLOW);
+}
+// Time a page is shown = BASE + PER_CHAR × letters (spaces count), but at least MIN_PAGE.
+const PACES={quick:{BASE:0.5,PER_CHAR:0.04,MIN_PAGE:1.5},
+             medium:{BASE:1,PER_CHAR:0.06,MIN_PAGE:2},
+             slow:{BASE:0,PER_CHAR:0.15,MIN_PAGE:4}};
+let pace='quick';
+let annMode='dot'; // Announcement menu: 'wrap' or 'dot'
+const BLANK=0.35;        // dark gap between pages, so it's clear the message changed
+const ANN_EVERY=3;       // show the announcement again after this many events
+function wrapText(text,size){ // words onto lines that fit across the sign
+  const T=s=>cur.caps?s.toUpperCase():s;
+  bx.font=fontStr(size);
+  const lines=[];let line='';
+  for(const w of text.split(/\s+/).filter(Boolean)){
+    const t=line?line+' '+w:w;
+    if(line&&runWidth(bx,T(t))>W){lines.push(line);line=w;}else line=t;
+  }
+  if(line)lines.push(line);
+  if(lines.length===2){ // balance the two lines, so a short word isn't left alone on the second
+    const words=text.split(/\s+/).filter(Boolean);let best=null;
+    for(let i=1;i<words.length;i++){
+      const a=words.slice(0,i).join(' '),b=words.slice(i).join(' ');
+      const m=Math.max(runWidth(bx,T(a)),runWidth(bx,T(b)));
+      if(m<=W&&(!best||m<best.m))best={m,ls:[a,b]};
+    }
+    if(best)return best.ls;
+  }
+  return lines;
+}
+function textPages(text,color){ // a message on one screen if it can be, else scrolled up a line at a time
+  const segs=text.split(/\s+[·•|]\s+/),mk=ls=>[makePage(ls.map(t=>({text:t,color})))];
+  const lines=segs.flatMap(g=>wrapText(g,botSize)); // each part starts a new line; the "·" is dropped
+  // 1. Each part fits on a line of its own.
+  if(lines.length<=2&&segs.length<=2&&segs.every(g=>wrapText(g,botSize).length===1))return mk(segs);
+  // 2 and 3, in the order the Announcement menu picks:
+  // wrap: the whole message word-wrapped onto two lines that fit, so nothing moves (a "·" at the break is dropped);
+  // dot:  a 3-line message in two parts, each on its own line, the too-wide one sliding sideways to show its end.
+  const wrap=()=>{const all=wrapText(text,botSize).map(l=>l.replace(/^[·•|]\s+|\s+[·•|]$/g,''));return all.length<=2?mk(all):null;};
+  const dot=()=>segs.length===2&&lines.length<=3?mk(segs):null;
+  const one=annMode==='dot'?dot()||wrap():wrap()||dot();
+  if(one)return one;
+  // 4. Longer: word-wrapped lines that scroll up one line at a time.
+  return [rollPage(lines.map(t=>({text:t,color})))];
+}
+// A message longer than one screen, scrolled up a line at a time: show the first two lines for one line's
+// reading time (as the user asked, to match the later waits), move up one line (at the Slow scroll speed), wait long enough to read the new line, and so on.
+function rollPage(lines){
+  const strips=lines.map(l=>makeStrip([l],botSize,'bottom'));
+  const k=inkOf(botSize),lift=Math.round(k.asc)-Math.round(32-k.desc); // top-line letters sit this much higher
+  const move=32/SLOW,steps=[];
+  let t=Math.max(END_MIN,readTime(lines[0].text.length)); // first wait: one line's reading time, like the later ones
+  steps.push(t);
+  for(let n=2;n<lines.length;n++){t+=move;steps.push(t);t+=Math.max(END_MIN,readTime(lines[n].text.length));steps.push(t);}
+  return {roll:true,strips,lift,move,steps,dur:t};
+}
+function rollPos(p,t){ // how many lines it has moved up at time t
+  let n=0;
+  for(let i=0;i+1<p.steps.length;i+=2){
+    const a=p.steps[i],b=p.steps[i+1]-0; // move from a to a+move
+    if(t<a)break;
+    n=i/2+Math.min(1,(t-a)/p.move);
+  }
+  return n;
+}
+function readTime(chars){const p=PACES[pace];return p.BASE+chars*p.PER_CHAR;}
+function makePage(lines){ // lines: [{text,color}], one or two
+  const strips=lines.map((l,i)=>makeStrip([l],i?botSize:topSize,i?'bottom':'top'));
+  const ys=lines.length===1?[16]:[0,32]; // a single line sits in the middle
+  const min=PACES[pace].MIN_PAGE;
+  const info=lines.map((l,i)=>({over:strips[i].width-W,perLight:l.text.length/strips[i].width}));
+  if(info.every(f=>f.over<=0))
+    return {strips,ys,start:0,dur:Math.max(min,readTime(lines.reduce((n,l)=>n+l.text.length,0)))};
+  // first wait: lines that fit, plus the first READ_PART of each wide line's first screen
+  const seen=info.reduce((n,f,i)=>n+(f.over<=0?lines[i].text.length:READ_PART*W*f.perLight),0);
+  const start=Math.max(min,readTime(seen));
+  let dur=start;
+  for(const f of info){
+    if(f.over<=0)continue;
+    const fast=Math.min(f.over,READ_PART*W)/SPEED,slow=Math.max(0,f.over-READ_PART*W)/SLOW;
+    const rest=(f.over+W-READ_PART*W)*f.perLight; // characters after the part read in the first wait
+    dur=Math.max(dur,start+fast+slow+Math.max(END_MIN,readTime(rest)-slow));
+  }
+  return {strips,ys,start,dur};
+}
+function buildPages(){
+  const ann=message?textPages(message,GREEN):[];
+  const ev=state.events.filter(e=>!e.hidden)
+    .map(e=>makePage([{text:whenText(e),color:AMBER},{text:e.title,color:WHITE}]));
+  pages=[];
+  ev.forEach((p,i)=>{if(i%ANN_EVERY===0)pages.push(...ann);pages.push(p);});
+  if(!ev.length)pages.push(...ann);
+  if(!pages.length)pages=textPages('Welcome to the Golden Gate clubhouse',WHITE);
+  pageI=0;pageT=0;
+}
+function drawPage(dt){
+  if(!paused){
+    pageT+=dt;
+    if(pageT>=pages[pageI].dur+BLANK){pageT=0;pageI=(pageI+1)%pages.length;}
+  }
+  const p=pages[pageI];
+  if(pageT>=p.dur)return; // the dark gap between pages
+  if(p.roll){
+    const n=rollPos(p,pageT);
+    p.strips.forEach((st,i)=>{
+      const pos=i-n;if(pos<=-1||pos>=2)return; // off the sign
+      const lift=pos>=1?0:pos<=0?p.lift:p.lift*(1-pos); // ease from bottom-edge to top-edge alignment
+      bx.drawImage(st,Math.floor((W-st.width)/2),Math.round(32*pos+lift));
+    });
+    return;
+  }
+  p.strips.forEach((s,i)=>{
+    const over=s.width-W;
+    const x=over<=0?Math.floor((W-s.width)/2)
+      :-Math.floor(slideOffset(pageT-p.start,over));
+    bx.drawImage(s,x,p.ys[i]);
+  });
+}
+function sizeSign(){
+  const r=sign.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+  sign.width=Math.round(r.width*dpr);sign.height=Math.round(r.width*dpr/5);
+}
+function drawStrip(strip,offset,y,scrolls){
+  if(!strip)return;
+  if(!scrolls){bx.drawImage(strip,Math.floor((W-strip.width)/2),y);return;}
+  const x=-Math.floor(offset);
+  bx.drawImage(strip,x,y);bx.drawImage(strip,x+strip.width,y);
+}
+function frame(t){
+  const dt=last?Math.min(0.1,(t-last)/1000):0;last=t;
+  bx.fillStyle='#000';bx.fillRect(0,0,W,H);
+  if(layout==='pages')drawPage(dt);
+  else{
+    if(!paused){topX=(topX+SLOW*dt)%topStrip.width;if(botStrip&&botStrip.width>W*1.0)botX=(botX+SLOW*dt)%botStrip.width;}
+    drawStrip(topStrip,topX,0,true);
+    if(botStrip){const fits=botStrip.width-measureGap()<=W;drawStrip(fits?trimmed():botStrip,botX,32,!fits);}
+  }
+  const px=bx.getImageData(0,0,W,H).data;
+  const cw=sign.width,ch=sign.height,p=cw/W,r=p*0.36;
+  sx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--led-off')||'#16120f';
+  sx.fillRect(0,0,cw,ch);
+  sx.fillStyle=`rgb(${DOT})`;sx.globalAlpha=0.16;
+  for(let j=0;j<H;j++)for(let i=0;i<W;i++){sx.fillRect(i*p+p/2-r*0.7,j*p+p/2-r*0.7,r*1.4,r*1.4);}
+  sx.globalAlpha=1;
+  for(let j=0;j<H;j++)for(let i=0;i<W;i++){
+    const k=(j*W+i)*4,lum=px[k]+px[k+1]+px[k+2];
+    if(lum<220)continue;
+    sx.fillStyle=`rgb(${px[k]},${px[k+1]},${px[k+2]})`;
+    sx.beginPath();sx.arc(i*p+p/2,j*p+p/2,r,0,6.2832);sx.fill();
+  }
+  requestAnimationFrame(frame);
+}
+let trimCache=null;
+function measureGap(){bx.font=fontStr(botSize);return runWidth(bx,'          ');}
+function trimmed(){if(!trimCache||trimCache.msg!==message){trimCache={msg:message,c:makeStrip([{text:message,color:GREEN}],botSize,'bottom')};}return trimCache.c;}
+
+/* ---------- controls ---------- */
+document.getElementById('save').onclick=()=>{
+  message=document.getElementById('msg').value.replace(/\s+/g,' ').trim();
+  buildStrips();
+  const s=document.getElementById('saved');s.textContent=message?'Saved. The sign now shows your message.':'Saved. The sign now shows events only.';
+  setTimeout(()=>{s.textContent='';},6000);
+};
+document.getElementById('pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'Play':'Pause';};
+const emailBox=document.getElementById('email');emailBox.value=SAMPLE;
+document.getElementById('read').onclick=()=>{
+  // Events from earlier emails stay until their day passes, so one that a later email only mentions in passing isn't lost.
+  const r=parseEmail(emailBox.value);let added=0;
+  for(const e of r.events){if(!state.events.some(o=>o.date.getTime()===e.date.getTime()&&o.title.toLowerCase()===e.title.toLowerCase())){state.events.push(e);added++;}}
+  state.events.sort((a,b)=>a.date-b.date);renderList();buildStrips();
+  document.getElementById('readnote').textContent=`Found ${r.events.length} upcoming event${r.events.length===1?'':'s'}, ${added} new.`;
+};
+document.getElementById('add').onclick=()=>{
+  const d=document.getElementById('ad').value,w=document.getElementById('aw').value.trim(),n=document.getElementById('addnote');
+  if(!d||!w){n.textContent='Fill in the date and what the event is.';return;}
+  const [y,m,dd]=d.split('-').map(Number);
+  state.events.push({date:new Date(y,m-1,dd),time:document.getElementById('at').value.trim().toLowerCase(),title:w,hidden:false});
+  state.events.sort((a,b)=>a.date-b.date);renderList();buildStrips();
+  document.getElementById('aw').value='';document.getElementById('at').value='';n.textContent='Added.';
+};
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paused=true;document.getElementById('pause').textContent='Play';}
+
+renderList();
+const fontSel=document.getElementById('fontsel');
+for(const f of FONTS){const o=document.createElement('option');o.value=f.id;o.textContent=f.label;fontSel.appendChild(o);}
+fontSel.value=cur.id;
+// Set both menus from the script's settings, so a browser that restores form choices on reload
+// can't show one setting while the sign draws another.
+const layoutSel=document.getElementById('layout');layoutSel.value=layout;
+layoutSel.onchange=e=>{layout=e.target.value;buildStrips();};
+const paceSel=document.getElementById('pace');paceSel.value=pace;
+paceSel.onchange=e=>{pace=e.target.value;buildStrips();};
+const annSel=document.getElementById('ann');annSel.value=annMode;
+annSel.onchange=e=>{annMode=e.target.value;buildStrips();};
+const scrollSel=document.getElementById('scroll');scrollSel.value=String(SPEED);
+scrollSel.onchange=e=>{SPEED=+e.target.value;buildStrips();};
+const slowSel=document.getElementById('slow');slowSel.value=String(SLOW);
+slowSel.onchange=e=>{SLOW=+e.target.value;buildStrips();};
+const descSel=document.getElementById('desc');descSel.value=descMode;
+descSel.onchange=e=>{descMode=e.target.value;applyFont();};
+fontSel.onchange=()=>{cur=FONTS.find(f=>f.id===fontSel.value)||FONTS[0];loadFont().then(applyFont,applyFont);};
+const start=()=>{sizeSign();applyFont();requestAnimationFrame(frame);};
+window.addEventListener('resize',sizeSign);
+loadFont().then(start,start);
+</script>

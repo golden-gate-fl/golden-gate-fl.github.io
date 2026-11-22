@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Change the clubhouse sign</title>
+<link rel="stylesheet" href="style.css">
+<script src="forms.js" defer></script>
+</head>
+<body>
+<main>
+<p class="crumb"><a href="./">← The clubhouse sign</a></p>
+<h1>Change the sign</h1>
+
+<p class="note"><strong>Preview.</strong> The sign isn't built yet, and its email address isn't
+set up: these forms use the placeholder <span class="sign-email"></span>, so the emails will
+bounce. Try them to see how it will work.</p>
+
+<p>Pick what you want to do. When you press the button, your mail app opens with the email
+filled in: check it and press <strong>Send</strong>. It must go from an approved email address.
+The sign replies to say what it will show.</p>
+<p class="hint">Changes last until the next weekly update, which replaces them. If no mail app
+opens, copy the address and message shown below the button into a new email.</p>
+
+<h2>Announcements</h2>
+<p class="hint">Up to 3 at a time. The sign's replies number them 1 to 3.</p>
+
+<details><summary>Add an announcement</summary>
+<form data-kind="announce">
+  <label>What it says
+    <textarea name="text" required maxlength="300" placeholder="Turkey Potluck Nov 26 · Sign up in the clubhouse"></textarea>
+    <small>Written exactly as you want it, capitals and all. Put “ · ” between parts to show
+    each on its own line.</small></label>
+  <label>Last day to show it <small>(optional)</small><input type="date" name="until"></label>
+  <button>Open email</button>
+</form></details>
+
+<details><summary>Change an announcement</summary>
+<form data-kind="change">
+  <label>Which one<select name="n"><option>1</option><option>2</option><option>3</option></select></label>
+  <label>What it should say now<textarea name="text" required maxlength="300"></textarea></label>
+  <button>Open email</button>
+</form></details>
+
+<details><summary>Remove an announcement</summary>
+<form data-kind="remove">
+  <label>Which one<select name="n"><option>1</option><option>2</option><option>3</option></select></label>
+  <button>Open email</button>
+</form></details>
+
+<details><summary>Remove all announcements</summary>
+<form data-kind="clear">
+  <p>Takes every announcement off the sign.</p>
+  <button>Open email</button>
+</form></details>
+
+<h2>Events</h2>
+<p class="hint">For a lasting change, also ask the office to fix the weekly update.</p>
+
+<details><summary>Add an event</summary>
+<form data-kind="add-event">
+  <div class="row">
+    <label>Date<input type="date" name="date" required></label>
+    <label>Time <small>(optional)</small><input type="time" name="time"></label>
+  </div>
+  <label>Name<input name="name" required maxlength="80" placeholder="Bingo"></label>
+  <button>Open email</button>
+</form></details>
+
+<details><summary>Remove an event</summary>
+<form data-kind="remove-event">
+  <label>Date<input type="date" name="date" required></label>
+  <label>Name<input name="name" required maxlength="80"></label>
+  <button>Open email</button>
+</form></details>
+
+<h2>Turning the sign off</h2>
+<p class="hint">For right now, use the button by the microphone instead.</p>
+
+<details><summary>Turn the sign off for a time</summary>
+<form data-kind="off">
+  <label>Date<input type="date" name="date" required></label>
+  <div class="row">
+    <label>From<input type="time" name="from" required></label>
+    <label>Until<input type="time" name="to" required></label>
+  </div>
+  <label>Why <small>(optional)</small><input name="why" maxlength="80" placeholder="Dance"></label>
+  <button>Open email</button>
+</form></details>
+
+<h2>Potluck and 50/50</h2>
+<p class="hint">Only for addresses approved to run them. The sign replies with how to use the
+button.</p>
+
+<details><summary>Set up a potluck</summary>
+<form data-kind="potluck">
+  <div class="row">
+    <label>Date<input type="date" name="date" required></label>
+    <label>Number of tables<input type="number" name="tables" min="1" max="99" required></label>
+  </div>
+  <button>Open email</button>
+</form></details>
+
+<details><summary>Set up a 50/50 draw</summary>
+<form data-kind="5050">
+  <label>Ticket numbers handed out
+    <textarea name="ranges" required placeholder="123400 to 123499"></textarea>
+    <small>First and last ticket of each roll, one roll per line.</small></label>
+  <label>Winner's prize ($)<input type="number" name="prize" min="1" step="1" required></label>
+  <button>Open email</button>
+</form></details>
+
+<h2>Other</h2>
+
+<details><summary>What's on the sign now?</summary>
+<form data-kind="status">
+  <p>The sign replies with everything it's showing.</p>
+  <button>Open email</button>
+</form></details>
+
+<details><summary>Undo my last change</summary>
+<form data-kind="undo">
+  <button>Open email</button>
+</form></details>
+
+<details><summary>Something else</summary>
+<form data-kind="other">
+  <label>Tell the sign what you want, in plain words
+    <textarea name="text" required maxlength="1000" placeholder="Move Bingo on Wed Nov 25 to 6:30 pm"></textarea></label>
+  <button>Open email</button>
+</form></details>
+
+<footer>Clubhouse sign · Golden Gate Mobile Home Community</footer>
+</main>
+</body>
+</html>
