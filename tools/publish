@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# publish <project>: copy ../<project>/site/ into <project>/ in this repo, commit and push.
+# The project repo must be committed first, so the published copy matches a commit there.
+set -euo pipefail
+
+here=$(cd "$(dirname "$0")/.." && pwd)
+proj=${1:?usage: tools/publish <project>   (e.g. clubhouse-display)}
+case $proj in */*|.*|"") echo "publish: bad project name: $proj" >&2; exit 1;; esac
+repo=$here/../$proj
+src=$repo/site
+
+[ -d "$src" ] || { echo "publish: no $src" >&2; exit 1; }
+if [ -n "$(git -C "$repo" status --porcelain)" ]; then
+    echo "publish: $proj has uncommitted changes; commit them first" >&2; exit 1
+fi
+rev=$(git -C "$repo" rev-parse --short HEAD)
+
+cd "$here"
+git pull --ff-only --quiet
+# -L copies the files that symlinks in site/ point to (e.g. the sign's mockup).
+rsync -rL --checksum --delete "$src/" "$proj/"
+git add -A -- "$proj"
+if git diff --cached --quiet -- "$proj"; then
+    echo "publish: $proj unchanged"; exit 0
+fi
+git commit --quiet -m "$proj: publish from $proj@$rev" -- "$proj"
+git push --quiet
+echo "publish: $proj published from $proj@$rev; live in a minute or so at"
+echo "  https://golden-gate-fl.github.io/$proj/"
