@@ -69,6 +69,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .ffgrid label{display:grid;gap:4px;font-weight:700;min-width:0;align-content:start}
 .ffgrid input,.ffgrid textarea{font:inherit;font-weight:400;color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%;box-sizing:border-box}
 .ffgrid .note{font-weight:400}
+.ffgrid select{font:inherit;font-weight:400;color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%;box-sizing:border-box}
+[hidden]{display:none!important}
 @media (max-width:560px){.ffgrid,.ffgrid3{grid-template-columns:1fr}}
 details summary{cursor:pointer;font-weight:700;font-size:1.1rem}
 details[open] summary{margin-bottom:12px}
@@ -153,14 +155,25 @@ details .stack{display:grid;gap:12px}
     <div class="panel-head">
       <span class="eyebrow">50/50 draw</span>
       <h2 id="ff-h">Try the 50/50 draw</h2>
-      <p>The host emails the sign the ticket rolls handed out and the prize, then presses the button by the microphone to draw. Here these buttons stand in for the button. Each draw spins every digit; they stop left to right, slower toward the end. The digits before the last 4 are drawn smaller.</p>
+      <p>When sales close, the seller emails the sign the prize and, if the sign draws, the ticket rolls handed out (unsold strips included). <strong>Sign draws:</strong> the host at the microphone presses the button (these buttons stand in for it); every digit spins and they stop left to right, slower toward the end. If the number is on an unsold strip, or the winner isn't here, press again: the sign shows "Drawing again" and spins again, never repeating a ticket. <strong>Drawn by hand:</strong> the host reads the stub out, then emails the number; the sign shows it, without spinning, when the email arrives. The digits before the last 4 are drawn smaller.</p>
     </div>
     <div class="ffgrid">
-      <label for="ffr">Tickets handed out<span class="note">First and last of each roll, one roll per line</span><textarea id="ffr" rows="2">123400 to 123499
-123700 to 123760</textarea></label>
+      <label for="ffhow">Who draws<select id="ffhow" autocomplete="off">
+        <option value="sign" selected>The sign draws</option>
+        <option value="hand">A person draws from the bucket</option>
+      </select></label>
       <label for="ffp">Prize ($)<input id="ffp" type="number" min="1" value="54"></label>
     </div>
-    <div class="ffgrid ffgrid3">
+    <div class="ffgrid" id="ffsignrow">
+      <label for="ffr">Tickets handed out<span class="note">First and last of each roll, one roll per line, unsold strips included</span><textarea id="ffr" rows="2">123400 to 123499
+123700 to 123760</textarea></label>
+      <label for="ffagain">"Drawing again" for (s)<input id="ffagain" type="number" min="0" step="0.5" value="2"></label>
+    </div>
+    <div class="ffgrid" id="ffhandrow" hidden>
+      <label for="ffwin">Winning number read out<input id="ffwin" inputmode="numeric" value="123456"></label>
+      <label for="ffdelay">Email takes (s)<input id="ffdelay" type="number" min="0" step="1" value="10"></label>
+    </div>
+    <div class="ffgrid ffgrid3" id="ffspinrow">
       <label for="fffirst">First digit stops after (s)<input id="fffirst" type="number" min="0" step="0.1" value="1.5"></label>
       <label for="ffshort">Then between digits (s)<input id="ffshort" type="number" min="0" step="0.1" value="0.5"></label>
       <label for="fflast">Before the last three (s)<input id="fflast" type="text" value="2, 3, 4"></label>
@@ -168,6 +181,7 @@ details .stack{display:grid;gap:12px}
     <div class="row">
       <button class="primary" id="ffstart" type="button">Start 50/50</button>
       <button class="secondary" id="ffdraw" type="button">Press: draw</button>
+      <button class="secondary" id="ffsend" type="button" hidden>Email: winning number</button>
       <button class="secondary" id="ffend" type="button">Hold: back to events</button>
       <span class="note" id="ffnote" role="status" aria-live="polite"></span>
     </div>
@@ -593,15 +607,23 @@ function trimmed(){if(!trimCache||trimCache.msg!==message){trimCache={msg:messag
    The ticket is picked when the button is pressed; the spin is only for show. Every digit
    spins (each at a slightly different speed) and they stop left to right: the first after
    "First digit stops after", then "Then between digits" apart, and the last three after the
-   "Before the last three" delays. Digits before the last 4 are drawn smaller. */
+   "Before the last three" delays. Digits before the last 4 are drawn smaller.
+   A redraw (unsold ticket, or winner not here: the sign can't tell which) first shows
+   "Drawing again". Drawn by hand: the number arrives by email after a delay and is shown
+   without spinning. */
 let mode='events',ff=null;
 const FF_DECEL=0.5;      // seconds each reel takes to slow to a stop
 const FF_SMALL=0.72;     // size of the digits before the last 4, against the others
 function val(id){return document.getElementById(id).value;}
+// One roll per line: "123400 to 123499", "123400-123499", "123400 123499", or one ticket.
+// Returns the ranges, or {bad: line} for the first line it can't read.
 function parseRanges(s){
   const out=[];
-  for(const m of s.matchAll(/(\d+)\s*(?:to|-|–|—)\s*(\d+)/gi)){
-    let a=m[1],b=m[2];if(+b<+a)[a,b]=[b,a];
+  for(const line of s.split('\n')){
+    if(!line.trim())continue;
+    const nums=line.match(/\d+/g)||[];
+    if(nums.length<1||nums.length>2)return {bad:line.trim()};
+    let [a,b=a]=nums;if(+b<+a)[a,b]=[b,a];
     out.push({a:+a,b:+b,len:Math.max(a.length,b.length)});
   }
   return out;
@@ -618,12 +640,14 @@ function ffStops(n){ // seconds after the press at which each digit stops
 function ffDraw(){
   if(!ff||ff.spinning)return;            // presses during the spin are ignored
   const note=document.getElementById('ffnote');
+  if(ff.hand){note.textContent='Drawn by hand: the button doesn\'t draw. Email the winning number.';return;}
   if(ff.used.size>=ff.total){note.textContent='Every ticket has been drawn.';return;}
   let idx;do{idx=Math.floor(Math.random()*ff.total);}while(ff.used.has(idx));
   ff.used.add(idx);
   let i=idx,r;for(r of ff.ranges){const n=r.b-r.a+1;if(i<n)break;i-=n;}
   ff.ticket=String(r.a+i).padStart(r.len,'0');
-  ff.t=0;ff.stops=ffStops(ff.ticket.length);
+  ff.t=ff.drawn?-Math.max(0,+val('ffagain')||0):0; // a redraw shows "Drawing again" first
+  ff.drawn=true;ff.stops=ffStops(ff.ticket.length);
   ff.speeds=[...ff.ticket].map(()=>10+Math.random()*8); // digits a second
   ff.spinning=true;
   note.textContent=`Drawing ticket ${ff.used.size} of ${ff.total}…`;
@@ -639,12 +663,13 @@ function draw5050(dt){
   if(ff.spinning&&!paused){
     ff.t+=dt;
     if(ff.t>=ff.stops[ff.stops.length-1]){ff.spinning=false;
-      document.getElementById('ffnote').textContent=`Ticket ${ff.ticket}. Press "Draw" again if the winner isn't here.`;}
+      document.getElementById('ffnote').textContent=`Ticket ${ff.ticket}. Not sold, or winner not here? Press "Draw" again.`;}
   }
   const big=botSize,small=Math.round(botSize*FF_SMALL);
   bx.textBaseline='alphabetic';
-  if(!ff.ticket){ // before the first draw: the prize, one line in the middle
-    const s=makeStrip([{text:'50/50: ',color:WHITE},{text:'$'+ff.prize,color:AMBER},{text:' for winner',color:WHITE}],big,'top');
+  if(!ff.ticket||ff.t<0){ // the prize before the first draw, or "Drawing again": one line in the middle
+    const s=ff.ticket?makeStrip([{text:'Drawing again',color:WHITE}],big,'top')
+      :makeStrip([{text:'50/50: ',color:WHITE},{text:'$'+ff.prize,color:AMBER},{text:' for winner',color:WHITE}],big,'top');
     const k=inkOf(big);
     bx.drawImage(s,Math.floor((W-s.width)/2),Math.round((H-(k.asc+k.desc))/2));
     return;
@@ -677,18 +702,51 @@ function draw5050(dt){
     x+=cell;
   }
 }
+function ffHowChanged(){
+  const hand=val('ffhow')==='hand';
+  document.getElementById('ffsignrow').hidden=hand;
+  document.getElementById('ffspinrow').hidden=hand;
+  document.getElementById('ffhandrow').hidden=!hand;
+  document.getElementById('ffdraw').hidden=hand;
+  document.getElementById('ffsend').hidden=!hand;
+  if(mode==='5050')document.getElementById('ffstart').onclick();
+}
+document.getElementById('ffhow').onchange=ffHowChanged;
 document.getElementById('ffstart').onclick=()=>{
-  const ranges=parseRanges(val('ffr')),note=document.getElementById('ffnote');
+  const note=document.getElementById('ffnote');
+  clearTimeout(ffMail);
+  if(val('ffhow')==='hand'){
+    ff={hand:true,prize:val('ffp')||'0',ticket:null,t:0,stops:[],speeds:[],spinning:false};
+    mode='5050';note.textContent='Drawn by hand. Read the stub out, then press "Email: winning number".';
+    return;
+  }
+  const ranges=parseRanges(val('ffr'));
+  if(ranges.bad){note.textContent=`Can't read "${ranges.bad}". Give the first and last ticket of the roll, like 123400 to 123499.`;return;}
   if(!ranges.length){note.textContent='Enter the first and last ticket of each roll, like 123400 to 123499.';return;}
   const total=ranges.reduce((n,r)=>n+r.b-r.a+1,0);
-  ff={prize:val('ffp')||'0',ranges,total,used:new Set(),ticket:null,t:0,stops:[],speeds:[],spinning:false};
+  ff={prize:val('ffp')||'0',ranges,total,used:new Set(),ticket:null,drawn:false,t:0,stops:[],speeds:[],spinning:false};
   mode='5050';note.textContent=`${total} tickets. Press "Draw" to draw one.`;
+};
+let ffMail=null;
+document.getElementById('ffsend').onclick=()=>{
+  if(mode!=='5050'||!ff||!ff.hand)document.getElementById('ffstart').onclick();
+  const note=document.getElementById('ffnote'),num=val('ffwin').replace(/\D/g,'');
+  if(!num){note.textContent='Enter the winning number.';return;}
+  const wait=Math.max(0,+val('ffdelay')||0);
+  note.textContent=`Email sent. The sign shows it when it arrives (${wait} s here).`;
+  clearTimeout(ffMail);
+  ffMail=setTimeout(()=>{
+    if(!ff||!ff.hand)return;
+    // shown plainly: every reel already stopped on its digit
+    ff.ticket=num;ff.t=0;ff.stops=[...num].map(()=>0);ff.speeds=[...num].map(()=>1);ff.spinning=false;
+    note.textContent=`Ticket ${num}, from the email. Winner not here? Read out another and email it; it replaces this one.`;
+  },wait*1000);
 };
 document.getElementById('ffdraw').onclick=()=>{
   if(mode!=='5050')document.getElementById('ffstart').onclick();
   ffDraw();
 };
-document.getElementById('ffend').onclick=()=>{mode='events';ff=null;document.getElementById('ffnote').textContent='Back to events.';};
+document.getElementById('ffend').onclick=()=>{clearTimeout(ffMail);mode='events';ff=null;document.getElementById('ffnote').textContent='Back to events.';};
 
 /* ---------- controls ---------- */
 document.getElementById('save').onclick=()=>{
