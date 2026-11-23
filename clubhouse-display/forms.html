@@ -103,10 +103,21 @@ button.</p>
 
 <details><summary>Set up a 50/50 draw</summary>
 <form data-kind="5050">
-  <label>Ticket numbers handed out
-    <textarea name="ranges" required placeholder="123400 to 123499"></textarea>
-    <small>First and last ticket of each roll, one roll per line.</small></label>
   <label>Winner's prize ($)<input type="number" name="prize" min="1" step="1" required></label>
+  <label>Ticket numbers handed out <small>(only if the sign draws)</small>
+    <textarea name="ranges" placeholder="123400 to 123499"></textarea>
+    <small>First and last ticket of each roll, one roll per line, including strips torn off
+    but not sold. Leave empty if a person draws from the bucket.</small></label>
+  <label>Who sends the winning number <small>(only if a person draws, and it isn't you)</small>
+    <input type="email" name="drawer" placeholder="their email address">
+    <small>Their address must be approved for 50/50 draws. Only you or they can send the
+    number.</small></label>
+  <button>Open email</button>
+</form></details>
+
+<details><summary>50/50 winner (drawn by hand)</summary>
+<form data-kind="5050-winner">
+  <label>Winning ticket number<input name="ticket" inputmode="numeric" pattern="[0-9]+" maxlength="12" required></label>
   <button>Open email</button>
 </form></details>
 

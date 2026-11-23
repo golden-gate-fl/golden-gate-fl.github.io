@@ -48,8 +48,10 @@ const EMAILS = {
   potluck: (f) => ({ subject: "Potluck", body: `Potluck ${signDate(f.date)}, ${f.tables} tables` }),
   "5050": (f) => ({
     subject: "50/50",
-    body: `50/50\nTickets:\n${clean(f.ranges)}\nPrize: $${f.prize}`,
+    body: `50/50\nPrize: $${f.prize}` + (f.ranges.trim() ? `\nTickets:\n${clean(f.ranges)}` : "\nDrawn by hand") +
+      (f.drawer.trim() ? `\nDrawer: ${f.drawer.trim()}` : ""),
   }),
+  "5050-winner": (f) => ({ subject: "50/50 winner", body: `50/50 winner: ${f.ticket.trim()}` }),
   status: () => ({ subject: "Status", body: "Status" }),
   undo: () => ({ subject: "Undo", body: "Undo" }),
   other: (f) => ({ subject: "Request", body: clean(f.text) }),
