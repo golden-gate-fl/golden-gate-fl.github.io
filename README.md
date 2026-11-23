@@ -7,7 +7,7 @@ its own folder here:
 | Folder | Device | Master copy |
 | --- | --- | --- |
 | [`clubhouse-display/`](https://golden-gate-fl.github.io/clubhouse-display/) | The LED sign above the kitchen opening | `site/` in [clubhouse-display](https://github.com/golden-gate-fl/clubhouse-display) (private) |
-| `club-printer/` (planned) | The Men's Club printer | `site/` in [club-printer](https://github.com/golden-gate-fl/club-printer) (private) |
+| [`club-printer/`](https://golden-gate-fl.github.io/club-printer/) | The Men's Club printer: print by email | `site/` in [club-printer](https://github.com/golden-gate-fl/club-printer) (private) |
 
 Each device's page explains how to use it, links to simple forms that fill in an email to the
 device (the person checks it and presses Send in their own mail app), and links to a public
